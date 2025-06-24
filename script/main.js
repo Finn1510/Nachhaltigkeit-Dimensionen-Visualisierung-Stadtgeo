@@ -71,9 +71,16 @@ function updateWeights() {
 }
 
 function updateVisualization() {
-    const norms = calculateNorms(eco, econ, social, weights);
+    // Verwende neutrale Gewichtungen (1.0) für den 3D-Plot
+    const neutralWeights = { eco: 1.0, econ: 1.0, social: 1.0 };
+    const norms = calculateNorms(eco, econ, social, neutralWeights);
+    
+    // Verwende die aktuellen Gewichtungen nur für das Balkendiagramm
     const averages = calculateAverages(eco, econ, social, weights);
+    
     plot3DVectors(cities, eco, econ, social, norms);
+    
+    // Das Balkendiagramm erhält die gewichteten Daten
     plotAnimatedBarChart(cities, averages, sustainabilityType);
 }
 
