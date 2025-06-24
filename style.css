@@ -102,13 +102,15 @@ input:checked + .slider:before {
     font-weight: bold;
 }
 
-/* Sustainability Options */
 .sustainability-options {
+    width: 80vw;
+    max-width: 1000px;
     margin: 20px 0;
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #f9f9f9;
+    box-sizing: border-box;
 }
 
 .options-container {

@@ -118,7 +118,7 @@ export function plotAnimatedBarChart(cities, norms, sustainabilityType) {
     }];
 
     Plotly.newPlot('barChart', barDataInit, {
-        title: titleText,
+        title: { text: titleText },
         yaxis: { title: 'Gesamtscore (Norm)', range: [0, Math.max(...sortedNorms) * 1.2] },
         xaxis: { tickangle: -45 },
         margin: { l: 50, r: 20, t: 50, b: 100 }
