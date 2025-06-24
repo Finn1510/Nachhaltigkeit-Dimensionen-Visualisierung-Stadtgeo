@@ -101,3 +101,56 @@ input:checked + .slider:before {
 .switch-label {
     font-weight: bold;
 }
+
+/* Sustainability Options */
+.sustainability-options {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.options-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.weights-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+.weight-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.weight-input label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.weight-input input {
+    width: 80px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.weight-input input:disabled {
+    background-color: #e9e9e9;
+    cursor: not-allowed;
+}

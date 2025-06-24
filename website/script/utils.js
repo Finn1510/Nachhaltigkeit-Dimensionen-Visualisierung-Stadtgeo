@@ -14,12 +14,24 @@ export function parseNumber(val) {
     return isNaN(f) ? NaN : f;
 }
 
-export function calculateNorms(eco, econ, social, isStrong) {
-    return eco.map((e, i) => {
-        const ecoVal = isStrong ? e * 1.5 : e;
-        const econVal = isStrong ? econ[i] * 0.5 : econ[i];
-        return Math.sqrt(ecoVal * ecoVal + econVal * econVal + social[i] * social[i]);
-    });
+export function calculateNorms(eco, econ, social, weights) {
+    if (typeof weights === 'boolean') {
+        // For backward compatibility with existing code
+        const isStrong = weights;
+        return eco.map((e, i) => {
+            const ecoVal = isStrong ? e * 1.5 : e;
+            const econVal = isStrong ? econ[i] * 0.5 : econ[i];
+            return Math.sqrt(ecoVal * ecoVal + econVal * econVal + social[i] * social[i]);
+        });
+    } else {
+        // New version with explicit weights
+        return eco.map((e, i) => {
+            const ecoVal = e * weights.eco;
+            const econVal = econ[i] * weights.econ;
+            const socialVal = social[i] * weights.social;
+            return Math.sqrt(ecoVal * ecoVal + econVal * econVal + socialVal * socialVal);
+        });
+    }
 }
 
 export const customColorScale = [
