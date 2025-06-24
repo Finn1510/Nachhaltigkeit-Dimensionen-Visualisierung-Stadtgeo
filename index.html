@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Nachhaltigkeitsvisualisierung</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>Dimensionen der Nachhaltigkeit Visualisierung</h1>
+    
+    <div id="plot3d"></div>
+
+    <div class="switch-container">
+        <span class="switch-label">Schwache Nachhaltigkeit</span>
+        <label class="switch">
+            <input type="checkbox" id="sustainabilitySwitch">
+            <span class="slider"></span>
+        </label>
+        <span class="switch-label">Starke Nachhaltigkeit</span>
+    </div>
+
+    <div id="barChart"></div>
+
+    <div id="errorModal">
+        <div id="errorModalContent">
+            <p id="errorText">Fehler</p>
+            <button onclick="closeErrorModal()">Schließen</button>
+        </div>
+    </div>
+
+    <script type="module" src="script/main.js"></script>
+</body>
+</html>
