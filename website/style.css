@@ -10,15 +10,30 @@ body {
     justify-content: space-between;
 }
 
-#plot3d, #barChart {
+#plot3d-container {
+    position: relative;
     flex: 1;
     min-width: 45%;
+}
+
+#plot3d, #barChart {
     width: 80vw;
     max-width: 1000px;
     height: 600px;
     margin-top: 20px;
-    border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+#plot3d {
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 100%;
+}
+
+#barChart {
+    flex: 1;
+    min-width: 45%;
+    border: 1px solid #ccc;
 }
 
 #errorModal {
@@ -167,7 +182,7 @@ input:checked + .slider:before {
 .documentation-links {
     display: inline-flex;
     gap: 15px;
-    margin-left: 5px;
+    margin-left: 20px;
     vertical-align: middle;
 }
 
@@ -185,4 +200,52 @@ input:checked + .slider:before {
 .doc-link:hover {
     background-color: #f5f5f5;
     color: #333;
+}
+
+#plot3d-container {
+    position: relative;
+    flex: 1;
+    min-width: 45%;
+}
+
+#fullscreenBtn {
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#fullscreenBtn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+}
+
+.fullscreen-mode {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9999;
+    background: white;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
+/* Adjust the styles for the plot when in fullscreen */
+.fullscreen-mode #plot3d {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    border: none; /* Remove border in fullscreen mode */
 }
