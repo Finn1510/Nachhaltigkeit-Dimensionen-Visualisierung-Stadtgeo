@@ -5,7 +5,7 @@ let plot3dInitialized = false;
 
 export function plot3DVectors(cities, eco, econ, social, norms) {
     const maxNorm = Math.max(...norms);
-    const axisMax = maxNorm * 1.2;
+    const axisMax = maxNorm * 0.8;
     
     const lineX = [], lineY = [], lineZ = [], lineColors = [], lineTexts = [];
     
@@ -17,7 +17,7 @@ export function plot3DVectors(cities, eco, econ, social, norms) {
         const normValue = norms[i];
         lineColors.push(normValue, normValue);
         
-        const text = `${cities[i]}<br>Norm: ${normValue.toFixed(2)}`;
+        const text = `${cities[i]}<br>Ökologie: ${eco[i].toFixed(2)}<br>Ökonomie: ${econ[i].toFixed(2)}<br>Soziales: ${social[i].toFixed(2)}`;
         lineTexts.push(text, text);
     }
 
@@ -85,14 +85,14 @@ export function plot3DVectors(cities, eco, econ, social, norms) {
     }
 }
 
-export function plotAnimatedBarChart(cities, norms, sustainabilityType) {
-    const pairs = cities.map((city, i) => [city, norms[i]]);
+export function plotAnimatedBarChart(cities, averages, sustainabilityType) {
+    const pairs = cities.map((city, i) => [city, averages[i]]);
     pairs.sort((a, b) => b[1] - a[1]);
 
     const sortedCities = pairs.map(p => p[0]);
     const sortedNorms = pairs.map(p => p[1]);
 
-    let titleText = 'Euklidische Norm (Gesamtscore) je Stadt (';
+    let titleText = 'Mittelwert je Stadt (';
     if (typeof sustainabilityType === 'boolean') {
         titleText += sustainabilityType ? "Starke" : "Schwache";
         titleText += ' Nachhaltigkeit)';
@@ -119,7 +119,7 @@ export function plotAnimatedBarChart(cities, norms, sustainabilityType) {
 
     Plotly.newPlot('barChart', barDataInit, {
         title: { text: titleText },
-        yaxis: { title: 'Gesamtscore (Norm)', range: [0, Math.max(...sortedNorms) * 1.2] },
+        yaxis: { title: 'Gesamtscore', range: [0, Math.max(...sortedNorms) * 1.2] },
         xaxis: { tickangle: -45 },
         margin: { l: 50, r: 20, t: 50, b: 100 }
     }).then(() => {
