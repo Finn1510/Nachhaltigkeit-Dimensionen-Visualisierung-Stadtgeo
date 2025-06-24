@@ -1,4 +1,4 @@
-import { parseNumber, calculateNorms, showErrorModal, closeErrorModal } from './utils.js';
+import { parseNumber, calculateNorms, showErrorModal, closeErrorModal, calculateAverages } from './utils.js';
 import { plot3DVectors, plotAnimatedBarChart } from './plots.js';
 
 let cities = [], eco = [], econ = [], social = [];
@@ -72,8 +72,9 @@ function updateWeights() {
 
 function updateVisualization() {
     const norms = calculateNorms(eco, econ, social, weights);
+    const averages = calculateAverages(eco, econ, social, weights);
     plot3DVectors(cities, eco, econ, social, norms);
-    plotAnimatedBarChart(cities, norms, sustainabilityType);
+    plotAnimatedBarChart(cities, averages, sustainabilityType);
 }
 
 // Setup event listeners for sustainability type radio buttons
