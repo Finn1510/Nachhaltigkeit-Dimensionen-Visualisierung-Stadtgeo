@@ -2,6 +2,60 @@ import { customColorScale } from './utils.js';
 
 // Keep track if the plot was initialized
 let plot3dInitialized = false;
+let globalCameraPosition = null;
+
+// Initialize fullscreen functionality
+function initFullscreenButton() {
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const plot3dContainer = document.getElementById('plot3d-container');
+    const plot3dElement = document.getElementById('plot3d');
+    
+    if (!fullscreenBtn) return;
+    
+    fullscreenBtn.addEventListener('click', () => {
+        const isFullscreen = plot3dContainer.classList.contains('fullscreen-mode');
+        
+        if (!isFullscreen) {
+            plot3dContainer.classList.add('fullscreen-mode');
+            fullscreenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/></svg>';
+            
+            // Resize plot for better fullscreen view
+            setTimeout(() => {
+                Plotly.relayout(plot3dElement, {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+            }, 100);
+        } else {
+            plot3dContainer.classList.remove('fullscreen-mode');
+            fullscreenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>';
+            
+            // Reset to original size
+            setTimeout(() => {
+                Plotly.relayout(plot3dElement, {
+                    width: null,
+                    height: 600
+                });
+            }, 100);
+        }
+    });
+    
+    // Handle escape key to exit fullscreen
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && plot3dContainer.classList.contains('fullscreen-mode')) {
+            plot3dContainer.classList.remove('fullscreen-mode');
+            fullscreenBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>';
+            
+            // Reset to original size
+            setTimeout(() => {
+                Plotly.relayout(plot3dElement, {
+                    width: null,
+                    height: 600
+                });
+            }, 100);
+        }
+    });
+}
 
 export function plot3DVectors(cities, eco, econ, social, norms) {
     const maxNorm = Math.max(...norms);
@@ -76,10 +130,35 @@ export function plot3DVectors(cities, eco, econ, social, norms) {
         showlegend: false
     };
 
+    // Save the current camera position before updating if it exists
+    if (!globalCameraPosition) {
+        const graphDiv = document.getElementById('plot3d');
+        if (graphDiv && graphDiv._fullLayout && graphDiv._fullLayout.scene && graphDiv._fullLayout.scene.camera) {
+            globalCameraPosition = JSON.parse(JSON.stringify(graphDiv._fullLayout.scene.camera));
+        }
+    }
+
+    // Apply the stored camera position if available
+    if (globalCameraPosition) {
+        layout.scene.camera = globalCameraPosition;
+    }
+
     // Use React for updates instead of newPlot to avoid rerendering
     if (!plot3dInitialized) {
         Plotly.newPlot('plot3d', [coneTrace, labelTrace, ...axes], layout);
         plot3dInitialized = true;
+        
+        // Add event listener to capture camera position changes
+        const plot3dElement = document.getElementById('plot3d');
+        plot3dElement.on('plotly_relayout', function(eventData) {
+            const graphDiv = document.getElementById('plot3d');
+            if (graphDiv && graphDiv._fullLayout && graphDiv._fullLayout.scene && graphDiv._fullLayout.scene.camera) {
+                globalCameraPosition = JSON.parse(JSON.stringify(graphDiv._fullLayout.scene.camera));
+            }
+        });
+        
+        // Initialize fullscreen button after first plot creation
+        setTimeout(initFullscreenButton, 100);
     } else {
         Plotly.react('plot3d', [coneTrace, labelTrace, ...axes], layout);
     }
