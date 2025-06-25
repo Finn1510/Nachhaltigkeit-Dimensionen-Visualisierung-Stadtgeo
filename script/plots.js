@@ -231,48 +231,54 @@ export function plotAnimatedBarChart(cities, averages, sustainabilityType) {
             });
         });
     } else if (orderChanged) {
-        // Order changed: recreate plot with new order but current values, then animate
+        // First animate values in current order, then reorder
         const currentElement = document.getElementById('barChart');
         const currentData = currentElement.data;
-        const currentValues = currentData[0].y;
         
-        // Create new plot with new order but keep current values temporarily
-        const tempData = [{
-            x: sortedCities,
-            y: sortedCities.map(city => {
-                const oldIndex = currentCityOrder.indexOf(city);
-                return oldIndex !== -1 ? currentValues[oldIndex] : 0;
-            }),
-            type: 'bar',
-            marker: {
-                color: sortedNorms,
-                colorscale: customColorScale,
-                cmin: 0,
-                cmax: Math.max(...sortedNorms),
-                line: { width: 1, color: '#000' }
-            },
-            customdata: sortedNorms,
-            hovertemplate: '%{x}: %{customdata:.2f}<extra></extra>'
-        }];
+        // Step 1: Animate to new values in current order
+        const currentOrderNewValues = currentCityOrder.map(city => {
+            const newIndex = sortedCities.indexOf(city);
+            return newIndex !== -1 ? sortedNorms[newIndex] : 0;
+        });
+        
+        const currentOrderColors = currentCityOrder.map(city => {
+            const newIndex = sortedCities.indexOf(city);
+            return newIndex !== -1 ? sortedNorms[newIndex] : 0;
+        });
 
-        const layout = {
-            title: { text: titleText },
-            yaxis: { title: 'Gesamtscore', range: [0, Math.max(...sortedNorms) * 1.2] },
-            xaxis: { tickangle: -45 },
-            margin: { l: 50, r: 20, t: 50, b: 100 }
-        };
-
-        Plotly.newPlot('barChart', tempData, layout).then(() => {
-            currentCityOrder = [...sortedCities];
-            // Now animate to the new values
-            currentAnimationPromise = Plotly.animate('barChart', {
-                data: [{ y: sortedNorms }]
+        // Animate to new values in current order
+        currentAnimationPromise = Plotly.animate('barChart', {
+            data: [{
+                y: currentOrderNewValues,
+                marker: { color: currentOrderColors }
+            }],
+            layout: { title: { text: titleText } }
+        }, {
+            transition: { duration: 600, easing: 'cubic-in-out' },
+            frame: { duration: 600 }
+        }).then(() => {
+            // Step 2: Short delay before reordering
+            return new Promise(resolve => setTimeout(resolve, 200));
+        }).then(() => {
+            // Step 3a: First update the city labels instantly
+            return Plotly.restyle('barChart', { x: [sortedCities] });
+        }).then(() => {
+            // Step 3b: Then animate bars to their new positions
+            return Plotly.animate('barChart', {
+                data: [{
+                    y: sortedNorms,
+                    marker: { color: sortedNorms }
+                }]
             }, {
-                transition: { duration: 500, easing: 'cubic-in-out' },
-                frame: { duration: 500 }
-            }).then(() => {
-                currentAnimationPromise = null;
+                transition: { 
+                    duration: 800, 
+                    easing: 'cubic-in-out'
+                },
+                frame: { duration: 800 }
             });
+        }).then(() => {
+            currentCityOrder = [...sortedCities];
+            currentAnimationPromise = null;
         });
     } else {
         // Same order: just animate the values
@@ -283,8 +289,8 @@ export function plotAnimatedBarChart(cities, averages, sustainabilityType) {
             }],
             layout: { title: { text: titleText } }
         }, {
-            transition: { duration: 500, easing: 'cubic-in-out' },
-            frame: { duration: 500 }
+            transition: { duration: 600, easing: 'cubic-in-out' },
+            frame: { duration: 600 }
         }).then(() => {
             currentAnimationPromise = null;
         });
