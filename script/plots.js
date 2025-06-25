@@ -3,6 +3,9 @@ import { customColorScale } from './utils.js';
 // Keep track if the plot was initialized
 let plot3dInitialized = false;
 let globalCameraPosition = null;
+let barChartInitialized = false;
+let currentAnimationPromise = null;
+let currentCityOrder = null;
 
 // Initialize fullscreen functionality
 function initFullscreenButton() {
@@ -181,32 +184,109 @@ export function plotAnimatedBarChart(cities, averages, sustainabilityType) {
         else titleText += 'Benutzerdefinierte Gewichtung)';
     }
 
-    const barDataInit = [{
-        x: sortedCities,
-        y: sortedCities.map(() => 0),
-        type: 'bar',
-        marker: {
-            color: sortedNorms,
-            colorscale: customColorScale,
-            cmin: 0,
-            cmax: Math.max(...sortedNorms),
-            line: { width: 1, color: '#000' }
-        },
-        customdata: sortedNorms,
-        hovertemplate: '%{x}: %{customdata:.2f}<extra></extra>'
-    }];
+    // Cancel any ongoing animation
+    if (currentAnimationPromise) {
+        Plotly.animate('barChart', null, { frame: { duration: 0 } });
+        currentAnimationPromise = null;
+    }
 
-    Plotly.newPlot('barChart', barDataInit, {
-        title: { text: titleText },
-        yaxis: { title: 'Gesamtscore', range: [0, Math.max(...sortedNorms) * 1.2] },
-        xaxis: { tickangle: -45 },
-        margin: { l: 50, r: 20, t: 50, b: 100 }
-    }).then(() => {
-        Plotly.animate('barChart', {
-            data: [{ y: sortedNorms }]
-        }, {
-            transition: { duration: 1000, easing: 'cubic-in-out' },
-            frame: { duration: 1000 }
+    // Check if city order has changed (indicating we need to handle reordering)
+    const orderChanged = currentCityOrder && 
+        JSON.stringify(currentCityOrder) !== JSON.stringify(sortedCities);
+
+    if (!barChartInitialized) {
+        // First time: create the plot with initial zero values for animation
+        const barDataInit = [{
+            x: sortedCities,
+            y: sortedCities.map(() => 0),
+            type: 'bar',
+            marker: {
+                color: sortedNorms,
+                colorscale: customColorScale,
+                cmin: 0,
+                cmax: Math.max(...sortedNorms),
+                line: { width: 1, color: '#000' }
+            },
+            customdata: sortedNorms,
+            hovertemplate: '%{x}: %{customdata:.2f}<extra></extra>'
+        }];
+
+        const layout = {
+            title: { text: titleText },
+            yaxis: { title: 'Gesamtscore', range: [0, Math.max(...sortedNorms) * 1.2] },
+            xaxis: { tickangle: -45 },
+            margin: { l: 50, r: 20, t: 50, b: 100 }
+        };
+
+        Plotly.newPlot('barChart', barDataInit, layout).then(() => {
+            barChartInitialized = true;
+            currentCityOrder = [...sortedCities];
+            currentAnimationPromise = Plotly.animate('barChart', {
+                data: [{ y: sortedNorms }]
+            }, {
+                transition: { duration: 1000, easing: 'cubic-in-out' },
+                frame: { duration: 1000 }
+            }).then(() => {
+                currentAnimationPromise = null;
+            });
         });
-    });
+    } else if (orderChanged) {
+        // Order changed: recreate plot with new order but current values, then animate
+        const currentElement = document.getElementById('barChart');
+        const currentData = currentElement.data;
+        const currentValues = currentData[0].y;
+        
+        // Create new plot with new order but keep current values temporarily
+        const tempData = [{
+            x: sortedCities,
+            y: sortedCities.map(city => {
+                const oldIndex = currentCityOrder.indexOf(city);
+                return oldIndex !== -1 ? currentValues[oldIndex] : 0;
+            }),
+            type: 'bar',
+            marker: {
+                color: sortedNorms,
+                colorscale: customColorScale,
+                cmin: 0,
+                cmax: Math.max(...sortedNorms),
+                line: { width: 1, color: '#000' }
+            },
+            customdata: sortedNorms,
+            hovertemplate: '%{x}: %{customdata:.2f}<extra></extra>'
+        }];
+
+        const layout = {
+            title: { text: titleText },
+            yaxis: { title: 'Gesamtscore', range: [0, Math.max(...sortedNorms) * 1.2] },
+            xaxis: { tickangle: -45 },
+            margin: { l: 50, r: 20, t: 50, b: 100 }
+        };
+
+        Plotly.newPlot('barChart', tempData, layout).then(() => {
+            currentCityOrder = [...sortedCities];
+            // Now animate to the new values
+            currentAnimationPromise = Plotly.animate('barChart', {
+                data: [{ y: sortedNorms }]
+            }, {
+                transition: { duration: 500, easing: 'cubic-in-out' },
+                frame: { duration: 500 }
+            }).then(() => {
+                currentAnimationPromise = null;
+            });
+        });
+    } else {
+        // Same order: just animate the values
+        currentAnimationPromise = Plotly.animate('barChart', {
+            data: [{
+                y: sortedNorms,
+                marker: { color: sortedNorms }
+            }],
+            layout: { title: { text: titleText } }
+        }, {
+            transition: { duration: 500, easing: 'cubic-in-out' },
+            frame: { duration: 500 }
+        }).then(() => {
+            currentAnimationPromise = null;
+        });
+    }
 }

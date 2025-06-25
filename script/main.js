@@ -96,16 +96,23 @@ document.querySelectorAll('input[name="sustainabilityType"]').forEach(input => {
     });
 });
 
-// Setup event listeners for weight inputs
+// Setup event listeners for weight inputs with debouncing
+let updateTimeout;
 document.querySelectorAll('.weight-input input').forEach(input => {
     input.addEventListener('input', () => {
         if (sustainabilityType === 'custom') {
-            weights = {
-                eco: parseFloat(document.getElementById('ecoWeight').value) || 1.0,
-                econ: parseFloat(document.getElementById('econWeight').value) || 1.0,
-                social: parseFloat(document.getElementById('socialWeight').value) || 1.0
-            };
-            updateVisualization();
+            // Clear previous timeout
+            clearTimeout(updateTimeout);
+            
+            // Set a new timeout to delay the update
+            updateTimeout = setTimeout(() => {
+                weights = {
+                    eco: parseFloat(document.getElementById('ecoWeight').value) || 1.0,
+                    econ: parseFloat(document.getElementById('econWeight').value) || 1.0,
+                    social: parseFloat(document.getElementById('socialWeight').value) || 1.0
+                };
+                updateVisualization();
+            }, 150); // 150ms delay
         }
     });
 });
