@@ -177,7 +177,7 @@ export function plotAnimatedBarChart(cities, averages, sustainabilityType) {
         titleText += ' Nachhaltigkeit)';
     } else {
         if (sustainabilityType === 'weak') titleText += 'Schwache Nachhaltigkeit)';
-        else if (sustainabilityType === 'strong') titleText += 'Starke Nachhaltigkeit)';
+        else if (sustainabilityType === 'strong') titleText += 'Starke Gewichtung)';
         else titleText += 'Benutzerdefinierte Gewichtung)';
     }
 
