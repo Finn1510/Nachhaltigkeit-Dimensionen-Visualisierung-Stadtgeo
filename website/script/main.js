@@ -30,6 +30,9 @@ fetch(csvTextUrl)
                 });
                 if (!cities.length) return showErrorModal('Keine gültigen Datensätze.');
 
+                // Ensure radio button state matches the default sustainability type
+                document.querySelector(`input[value="${sustainabilityType}"]`).checked = true;
+                
                 updateWeights();
                 updateVisualization();
             },
